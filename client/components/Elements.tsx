@@ -2,7 +2,13 @@ import Image from "next/image";
 
 const elements = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
-function Elements({ name }: { name: string }) {
+function Elements({
+  name,
+  setUserChoice,
+}: {
+  name: string;
+  setUserChoice: (value: number) => void;
+}) {
   //
   if (!elements.includes(name)) return null;
 
@@ -10,6 +16,7 @@ function Elements({ name }: { name: string }) {
     <div>
       <div
         className={`${name.toLocaleLowerCase()} h-32 w-32 flex justify-center items-center rounded-full transition-transform transform hover:scale-110`}
+        onClick={() => setUserChoice(elements.indexOf(name) + 1)}
       >
         <div
           className="bg-white h-24 w-24 flex justify-center items-center rounded-full transition-transform transform hover:scale-105"
