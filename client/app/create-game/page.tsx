@@ -2,7 +2,9 @@
 
 import Elements from "@/components/Elements";
 import { TransactionContext } from "@/context/TransactionContext";
+import { createGame } from "@/contract";
 import axiosInstance from "@/utils/axios";
+import hashMove from "@/utils/hash";
 import { useState, useContext } from "react";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
@@ -41,12 +43,24 @@ function Page() {
       return;
     }
 
-    await axiosInstance.post("/game", {
-      userWallet,
-      opponentWallet,
-      stake,
-      userChoice,
-    });
+    try {
+      await axiosInstance.post("/start-game", {
+        userWallet,
+        opponentWallet,
+        stake,
+        userChoice,
+      });
+
+      console.log("hmm");
+
+      const hashedMove = hashMove(userChoice, "some hash should be here"); // TODO: Add salt
+
+      console.log(hashedMove);
+
+      await createGame(hashedMove, opponentWallet, Number(stake));
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
