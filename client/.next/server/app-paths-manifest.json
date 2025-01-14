@@ -1,5 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/join-game/page": "app/join-game/page.js",
-  "/create-game/page": "app/create-game/page.js"
-}
