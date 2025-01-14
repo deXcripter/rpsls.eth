@@ -2,6 +2,7 @@
 
 import Elements from "@/components/Elements";
 import { TransactionContext } from "@/context/TransactionContext";
+import axiosInstance from "@/utils/axios";
 import { useState, useContext } from "react";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
@@ -34,11 +35,18 @@ function Page() {
     setStartGame(true);
   };
 
-  const handleSubmitMove = () => {
+  const handleSubmitMove = async () => {
     if (!userChoice) {
       alert("Please select a move");
       return;
     }
+
+    await axiosInstance.post("/game", {
+      userWallet,
+      opponentWallet,
+      stake,
+      userChoice,
+    });
   };
 
   return (
@@ -93,7 +101,10 @@ function Page() {
             <div>Your choice: {elementsTag[userChoice - 1]}</div>
           )}
         </div>
-        <button className="bg-green-600 w-[40%] mx-auto px-2 py-2">
+        <button
+          className="bg-green-600 w-[40%] mx-auto px-2 py-2"
+          onClick={handleSubmitMove}
+        >
           Submit Move
         </button>
       </div>
