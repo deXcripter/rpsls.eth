@@ -1,17 +1,23 @@
 "use client";
 
 import Elements from "@/components/Elements";
-import { useState } from "react";
+import { TransactionContext } from "@/context/TransactionContext";
+import { useState, useContext } from "react";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
 function Page() {
   const [startGame, setStartGame] = useState(false);
+  const { handleWalletConnection } = useContext(TransactionContext);
 
   return (
     <div className="min-h-screen">
       <div className="flex flex-col gap-4 w-[50%] m-auto mt-10">
-        <button type="button" className="bg-green-400 px-4 py-2">
+        <button
+          type="button"
+          className="bg-green-400 px-4 py-2"
+          onClick={() => handleWalletConnection()}
+        >
           Connect Wallet
         </button>
         <input

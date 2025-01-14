@@ -1,26 +1,53 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useState } from "react";
+
+// Extend the Window interface to include the ethereum property
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
 
 interface iTransactionContext {
   transaction: boolean;
-  setTransaction: (value: boolean) => void;
-  wallet: boolean;
-  setWallet: (value: boolean) => void;
+  userWallet: string | null;
+  handleWalletConnection: () => void;
 }
 
 export const TransactionContext = createContext<iTransactionContext>({
   transaction: false,
-  setTransaction: () => {},
-  wallet: false,
-  setWallet: () => {},
+  userWallet: null,
+  handleWalletConnection: () => {},
 });
 
 function TransactionProvider({ children }: { children: React.ReactNode }) {
   const [transaction, setTransaction] = useState(false);
-  const [wallet, setWallet] = useState(false);
+  const [userWallet, setUserWallet] = useState<string | null>(null);
+
+  const handleWalletConnection = async () => {
+    try {
+      console.log("Connecting to wallet");
+      const ethereum = window.ethereum;
+      if (!ethereum) {
+        alert("Please install MetaMask!");
+        return;
+      }
+
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      setUserWallet(accounts[0]);
+      console.log("Connected", accounts[0]);
+
+      return accounts[0];
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <TransactionContext.Provider
-      value={{ transaction, setTransaction, wallet, setWallet }}
+      value={{ transaction, userWallet, handleWalletConnection }}
     >
       {children}
     </TransactionContext.Provider>
