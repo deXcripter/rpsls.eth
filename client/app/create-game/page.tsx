@@ -44,20 +44,24 @@ function Page() {
     }
 
     try {
-      await axiosInstance.post("/start-game", {
-        userWallet,
-        opponentWallet,
-        stake,
-        userChoice,
-      });
-
       console.log("hmm");
 
       const hashedMove = hashMove(userChoice, "some hash should be here"); // TODO: Add salt
 
       console.log(hashedMove);
 
-      await createGame(hashedMove, opponentWallet, Number(stake));
+      const { contractAddress } = await createGame(
+        hashedMove,
+        opponentWallet,
+        Number(stake)
+      );
+
+      if (!contractAddress) return;
+
+      await axiosInstance.post("/start-game", {
+        contractAddress,
+        opponentWallet,
+      });
     } catch (err) {
       console.log(err);
     }

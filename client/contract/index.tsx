@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import contractABI from "./abi";
-import { hash } from "crypto";
 
 const provider = new ethers.BrowserProvider(window.ethereum);
 const signer = await provider.getSigner();
@@ -18,13 +17,15 @@ export const createGame = async (
     signer
   );
 
+  console.log(ethers.parseEther(stake.toString()));
+
   const rpsContract = await factory.deploy(move, oppWallet, {
     value: ethers.parseEther(stake.toString()),
   });
 
   console.log(rpsContract);
   await rpsContract.waitForDeployment();
-  const contactAddress = await rpsContract.getAddress();
-  console.log(contactAddress);
-  return contactAddress;
+  const contractAddress = await rpsContract.getAddress();
+  console.log(contractAddress);
+  return { contractAddress, rpsContract };
 };
