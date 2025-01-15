@@ -37,3 +37,23 @@ export const play = async (contractAddress: string, c2: number) => {
   await tx.wait();
   console.log("Play transaction sent");
 };
+export const solveGame = async (
+  contractAddress: string,
+  move: number,
+  salt: number
+) => {
+  if (!window.ethereum) {
+    console.error("Ethereum object does not exist");
+    return;
+  }
+
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+  const tx = await contract.solve(move, salt);
+
+  await tx.wait();
+  console.log("Game solved successfully");
+};

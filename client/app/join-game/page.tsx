@@ -1,11 +1,9 @@
 "use client";
 
 import Elements from "@/components/Elements";
-import CountdownTimer from "@/components/Timer";
 import { TransactionContext } from "@/context/TransactionContext";
 import { play } from "@/contract";
 import axiosInstance from "@/utils/axios";
-import hashMove from "@/utils/hash";
 import { useContext, useState } from "react";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
