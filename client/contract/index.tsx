@@ -17,7 +17,7 @@ export const createGame = async (
     signer
   );
 
-  console.log(ethers.parseEther(stake.toString()));
+  console.log(ethers.parseEther(stake.toString()), move);
 
   const rpsContract = await factory.deploy(move, oppWallet, {
     value: ethers.parseEther(stake.toString()),
@@ -28,4 +28,12 @@ export const createGame = async (
   const contractAddress = await rpsContract.getAddress();
   console.log(contractAddress);
   return { contractAddress, rpsContract };
+};
+
+export const play = async (contractAddress: string, c2: number) => {
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  console.log(contract, signer, c2, ethers.parseEther("0.00005"));
+  const tx = await contract.play(c2, { value: ethers.parseEther("0.00005") });
+  await tx.wait();
+  console.log("Play transaction sent");
 };

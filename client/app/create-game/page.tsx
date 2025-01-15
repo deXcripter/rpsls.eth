@@ -44,13 +44,9 @@ function Page() {
     }
 
     try {
-      console.log("hmm");
+      const hashedMove = hashMove(userChoice, 20); // TODO: Add salt
 
-      const hashedMove = hashMove(userChoice, "some hash should be here"); // TODO: Add salt
-
-      console.log(hashedMove);
-
-      const { contractAddress } = await createGame(
+      const { contractAddress, rpsContract } = await createGame(
         hashedMove,
         opponentWallet,
         Number(stake)
@@ -61,6 +57,8 @@ function Page() {
       await axiosInstance.post("/start-game", {
         contractAddress,
         opponentWallet,
+        stake,
+        contract: rpsContract,
       });
     } catch (err) {
       console.log(err);
