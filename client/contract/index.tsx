@@ -12,11 +12,13 @@ const checkMetamask = () => {
     return;
   }
 };
+
 export const createGame = async (
   hashedMove: string,
   oppWallet: string,
   stake: number
 ) => {
+  checkMetamask();
   const factory = new ethers.ContractFactory(
     contractABI,
     contractBytecode,
@@ -50,8 +52,10 @@ export const solveGame = async (
   move: number,
   salt: number
 ) => {
+  checkMetamask();
+
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
-  console.log("soolving the game");
+  console.log("soolving the game", " move: ", move, " salt: ", salt);
   const tx = await contract.solve(move, salt);
 
   await tx.wait();
@@ -59,6 +63,8 @@ export const solveGame = async (
 };
 
 export const claimPlayer2Timeout = async (contractAddress: string) => {
+  checkMetamask();
+
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
   const tx = await contract.j2Timeout();
   await tx.wait();
@@ -66,6 +72,8 @@ export const claimPlayer2Timeout = async (contractAddress: string) => {
 };
 
 export const claimPlayer1Timeout = async (contractAddress: string) => {
+  checkMetamask();
+
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
   const tx = await contract.j1Timeout();
   await tx.wait();

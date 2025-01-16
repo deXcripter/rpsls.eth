@@ -1,6 +1,7 @@
 "use client";
 
 import Elements from "@/components/Elements";
+import Loader from "@/components/Loader";
 import { TransactionContext } from "@/context/TransactionContext";
 import { createGame, solveGame } from "@/contract";
 import axiosInstance from "@/utils/axios";
@@ -18,7 +19,6 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
   const [submittedMove, setSubmittedMove] = useState(false);
-  const [move, setMove] = useState<null | number>(null);
   const [salt, setSalt] = useState<null | number>(null);
 
   useEffect(() => {
@@ -81,14 +81,16 @@ function Page() {
 
   const handleRevealMove = async () => {
     try {
-      const res = await solveGame(
-        "0x1a0eA698DF6B000AEDEc0b0428b8cd456492BFc6",
-        2,
-        7708
-      );
-      // const res = await solveGame(contractAddress, move!, salt!);
+      // const res = await solveGame(
+      //   "0x0a12A8bEC1dB5961AD4B5464F3A4CEEfeD102b9D",
+      //   1,
+      //   1065
+      // );
+      const res = await solveGame(contractAddress, userChoice!, salt!);
+      console.log(res);
     } catch (err) {
       console.log(err);
+      // TODO : This should probably delete the entry from the server as well
     }
   };
 
@@ -127,16 +129,20 @@ function Page() {
         </button>
       </div>
 
-      <div className={`${!startGame && "hidden"}`}>
-        <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
-          Select one
-        </h1>
-        <div className="flex justify-center gap-4 mt-4">
-          {elementsTag.map((name) => (
-            <Elements key={name} name={name} setUserChoice={setUserChoice} />
-          ))}
+      {loading ? (
+        <Loader message="Creating Game" />
+      ) : (
+        <div className={`${!startGame && "hidden"}`}>
+          <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
+            Select one
+          </h1>
+          <div className="flex justify-center gap-4 mt-4">
+            {elementsTag.map((name) => (
+              <Elements key={name} name={name} setUserChoice={setUserChoice} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5">
         <div className="mx-auto">
@@ -154,7 +160,8 @@ function Page() {
         ) : (
           <button
             className="bg-green-600 w-[40%] mx-auto px-2 py-2"
-            onClick={handleRevealMove}
+            // onClick={handleRevealMove}
+            onClick={handleSubmitMove}
           >
             Submit Move
           </button>
