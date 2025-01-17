@@ -37,11 +37,10 @@ function page() {
       };
       setContractAddress(contractAddress);
       await play(contractAddress, userChoice, signer!);
-      setPrompt("Ask your opponent to reveal move"); // update the prompt on the UI
+      setPrompt("Ask your opponent to reveal move");
       setHasPlayed(true);
     } catch (err) {
       setPrompt("Ask Player 1 to start the game with your wallet address");
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,7 @@ function page() {
       setPrompt("Stake claimed successfully!");
     } catch (err) {
       console.error("Error claiming stake:", err);
-      setPrompt("Failed to claim stake. Please try again later");
+      setPrompt("Failed to claim stake. Please try again in 5 minutes");
     }
   };
 

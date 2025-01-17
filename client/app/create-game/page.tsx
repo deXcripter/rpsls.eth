@@ -59,7 +59,6 @@ function Page() {
     setLoading(true);
 
     try {
-      console.log(salt);
       const hashedMove = hashMove(userChoice, salt!);
       const { contractAddress, rpsContract } = await createGame(
         hashedMove,
@@ -80,7 +79,7 @@ function Page() {
       setPrompt("Ask your opponent to play their move");
       setHasPlayed(true);
     } catch (err) {
-      console.log(err);
+      setPrompt("Something went wrong. Please try again");
       // setStartGame(false);
     } finally {
       setLoading(false);
@@ -94,7 +93,7 @@ function Page() {
       setPrompt("Stake claimed successfully!");
     } catch (err) {
       console.error("Error claiming stake:", err);
-      setPrompt("Failed to claim stake. Please try again later");
+      setPrompt("Failed to claim stake. Please try again in 5 mins");
     }
   };
 
@@ -102,7 +101,6 @@ function Page() {
     if (!signer) return alert("There is no signer presnet");
     try {
       const res = await solveGame(contractAddress, userChoice!, salt!, signer!);
-      console.log(res);
     } catch (err) {
       console.log(err);
       // TODO : This should probably delete the entry from the server as well

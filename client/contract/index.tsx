@@ -24,7 +24,6 @@ export const createGame = async (
 
   await rpsContract.waitForDeployment();
   const contractAddress = await rpsContract.getAddress();
-  console.log(contractAddress, "is deployed");
   return { contractAddress, rpsContract };
 };
 
@@ -39,7 +38,6 @@ export const play = async (
     value: stake,
   });
   await tx.wait();
-  console.log("Play transaction sent");
 };
 
 export const solveGame = async (
@@ -49,11 +47,9 @@ export const solveGame = async (
   signer: ethers.ContractRunner
 ) => {
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
-  console.log("soolving the game", " move: ", move, " salt: ", salt);
   const tx = await contract.solve(move, salt);
 
   await tx.wait();
-  console.log("Game solved successfully");
 };
 
 export const claimPlayer2Timeout = async (
@@ -64,7 +60,6 @@ export const claimPlayer2Timeout = async (
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
   const tx = await contract.j2Timeout();
   await tx.wait();
-  console.log("Timeout claimed");
 };
 
 export const claimPlayer1Timeout = async (
@@ -74,5 +69,4 @@ export const claimPlayer1Timeout = async (
   const contract = new ethers.Contract(contractAddress, contractABI, signer);
   const tx = await contract.j1Timeout();
   await tx.wait();
-  console.log("Timeout claimed");
 };

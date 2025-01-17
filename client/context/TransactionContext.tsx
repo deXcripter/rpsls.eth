@@ -34,6 +34,14 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadEthWindow() {
       const provider = new ethers.BrowserProvider(window.ethereum);
+      const chain = await provider.getNetwork();
+      if (Number(chain.chainId) !== 11155111) {
+        alert("Switching you to the sepolia network");
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa36a7" }],
+        });
+      } else console.log("Connected to the sepolia network");
       const signer = await provider.getSigner();
       setProvider(provider);
       setSigner(signer);
@@ -55,9 +63,7 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
       setUserWallet(accounts[0]);
 
       return accounts[0];
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (
