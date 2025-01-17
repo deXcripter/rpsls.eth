@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
+import { ethers } from "ethers";
 
 // Extend the Window interface to include the ethereum property
 declare global {
@@ -12,17 +13,33 @@ interface iTransactionContext {
   transaction: boolean;
   userWallet: string | null;
   handleWalletConnection: () => void;
+  provider: any;
+  signer: ethers.ContractRunner | null;
 }
 
 export const TransactionContext = createContext<iTransactionContext>({
   transaction: false,
   userWallet: null,
   handleWalletConnection: () => {},
+  provider: null,
+  signer: null,
 });
 
 function TransactionProvider({ children }: { children: React.ReactNode }) {
   const [transaction, setTransaction] = useState(false);
   const [userWallet, setUserWallet] = useState<string | null>(null);
+  const [provider, setProvider] = useState<any>(null);
+  const [signer, setSigner] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadEthWindow() {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      setProvider(provider);
+      setSigner(signer);
+    }
+    loadEthWindow();
+  }, []);
 
   const handleWalletConnection = async () => {
     try {
@@ -45,7 +62,13 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <TransactionContext.Provider
-      value={{ transaction, userWallet, handleWalletConnection }}
+      value={{
+        transaction,
+        userWallet,
+        handleWalletConnection,
+        provider,
+        signer,
+      }}
     >
       {children}
     </TransactionContext.Provider>

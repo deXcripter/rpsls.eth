@@ -14,7 +14,8 @@ function Page() {
   const [startGame, setStartGame] = useState(false);
   const [opponentWallet, setOpponentWallet] = useState("");
   const [stake, setStake] = useState<number | string>("");
-  const { handleWalletConnection, userWallet } = useContext(TransactionContext);
+  const { handleWalletConnection, userWallet, signer } =
+    useContext(TransactionContext);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
@@ -60,7 +61,8 @@ function Page() {
       const { contractAddress, rpsContract } = await createGame(
         hashedMove,
         opponentWallet,
-        Number(stake)
+        Number(stake),
+        signer!
       );
 
       if (!contractAddress) return;
@@ -83,7 +85,7 @@ function Page() {
 
   const handleRevealMove = async () => {
     try {
-      const res = await solveGame(contractAddress, userChoice!, salt!);
+      const res = await solveGame(contractAddress, userChoice!, salt!, signer!);
       console.log(res);
     } catch (err) {
       console.log(err);

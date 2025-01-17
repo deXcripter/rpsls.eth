@@ -9,7 +9,8 @@ import { useContext, useState } from "react";
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
 function page() {
-  const { handleWalletConnection, userWallet } = useContext(TransactionContext);
+  const { handleWalletConnection, userWallet, signer } =
+    useContext(TransactionContext);
   const [startGame, setStartGame] = useState(true);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [prompt, setPrompt] = useState<string>("Select one");
@@ -33,7 +34,7 @@ function page() {
         stake: number;
       };
       setContractAddress(contractAddress);
-      await play(contractAddress, userChoice);
+      await play(contractAddress, userChoice, signer!);
       setPrompt("Ask your opponent to reveal move");
       setStartGame(false); // Set to false to indicate the game has started
     } catch (err) {
@@ -45,7 +46,7 @@ function page() {
   const handleClaimStake = async () => {
     if (!contractAddress) return;
     try {
-      await claimPlayer1Timeout(contractAddress);
+      await claimPlayer1Timeout(contractAddress, signer!);
       setPrompt("Stake claimed successfully!");
     } catch (err) {
       console.error("Error claiming stake:", err);
