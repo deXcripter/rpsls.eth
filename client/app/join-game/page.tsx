@@ -58,7 +58,7 @@ function page() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="h-screen">
       <div className="flex flex-col gap-4 w-[50%] m-auto mt-10">
         {userWallet ? (
           <div className="bg-green-400 px-4 py-2">{userWallet}</div>

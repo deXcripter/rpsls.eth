@@ -58,7 +58,7 @@ function Page() {
   };
 
   const handleSubmitMove = async () => {
-    if (!signer) return alert("There is no signer presnet");
+    if (!signer) return alert("Please refresh your browser and try again");
 
     if (!userChoice) {
       alert("Please select a move");
@@ -105,7 +105,7 @@ function Page() {
   };
 
   const handleRevealMove = async () => {
-    if (!signer) return alert("There is no signer presnet");
+    if (!signer) return alert("Please refresh your browser and try again (");
     setRevealLoading(true);
     try {
       await solveGame(contractAddress, userChoice!, salt!, signer!);
