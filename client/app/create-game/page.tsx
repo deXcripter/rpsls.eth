@@ -24,6 +24,7 @@ function Page() {
   const [salt, setSalt] = useState<null | number>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     setSalt(Math.round(Math.random() * 10000));
@@ -102,8 +103,8 @@ function Page() {
     if (!signer) return alert("There is no signer presnet");
     setRevealLoading(true);
     try {
-      const res = await solveGame(contractAddress, userChoice!, salt!, signer!);
-      console.log(res);
+      await solveGame(contractAddress, userChoice!, salt!, signer!);
+      setRevealed(true);
     } catch (err) {
       console.log(err);
       // TODO : This should probably delete the entry from the server as well
@@ -181,6 +182,7 @@ function Page() {
           <button
             className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
             onClick={handleRevealMove}
+            disabled={revealed}
           >
             Reveal Move
           </button>
