@@ -17,6 +17,7 @@ function page() {
   const [contractAddress, setContractAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
+  const [canReloadGame, setCanReloadGame] = useState(false);
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
@@ -40,7 +41,8 @@ function page() {
       setPrompt("Ask your opponent to reveal move");
       setHasPlayed(true);
     } catch (err) {
-      setPrompt("Ask Player 1 to start the game with your wallet address");
+      setPrompt("Ask Player 1 to re-start the game with your wallet address");
+      setCanReloadGame(true);
     } finally {
       setLoading(false);
     }
@@ -51,10 +53,15 @@ function page() {
     try {
       await claimPlayer2Timeout(contractAddress, signer!);
       setPrompt("Stake claimed successfully!");
+      setCanReloadGame(true);
     } catch (err) {
       console.error("Error claiming stake:", err);
       setPrompt("Failed to claim stake. Please try again in 5 minutes");
     }
+  };
+
+  const restartGame = () => {
+    window.location.reload();
   };
 
   return (
@@ -86,17 +93,17 @@ function page() {
 
       <div className="flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5">
         <div className="mx-auto">
-          {hasPlayed && userChoice && (
-            <div>Your choice: {elementsTag[userChoice - 1]}</div>
-          )}
+          {userChoice && <div>Your choice: {elementsTag[userChoice - 1]}</div>}
         </div>
+
         {loading ? (
           <Loader message="Submitting move" />
         ) : (
           <button
+            type="button"
             className={`${
-              userChoice && userWallet ? "bg-green-600" : "bg-gray-600 "
-            } w-[40%] mx-auto px-2 py-2`}
+              userChoice && userWallet ? "bg-green-600" : "bg-gray-600"
+            } w-[40%] mx-auto px-2 py-2 ${hasPlayed && "hidden"}`}
             onClick={handleSubmitMove}
             disabled={!userChoice || !userWallet}
           >
@@ -111,6 +118,14 @@ function page() {
             onClick={handleClaimStake}
           >
             Claim Stake
+          </button>
+        )}
+        {canReloadGame && (
+          <button
+            className="bg-red-500 w-[40%] mx-auto px-2 py-2"
+            onClick={restartGame}
+          >
+            Reload Game
           </button>
         )}
       </div>

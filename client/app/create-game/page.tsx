@@ -31,6 +31,7 @@ function Page() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [canReloadGame, setCanReloadGame] = useState(false);
 
   useEffect(() => {
     setSalt(Math.round(Math.random() * 10000));
@@ -67,6 +68,7 @@ function Page() {
     setLoading(true);
 
     try {
+      setCanReloadGame(false);
       const hashedMove = hashMove(userChoice, salt!);
       const { contractAddress, rpsContract } = await createGame(
         hashedMove,
@@ -87,10 +89,15 @@ function Page() {
       setHasPlayed(true);
     } catch (err) {
       setPrompt("Something went wrong. Please try again");
+      setCanReloadGame(true);
       // setStartGame(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const restartGame = () => {
+    window.location.reload();
   };
 
   const handleClaimStake = async () => {
@@ -128,6 +135,7 @@ function Page() {
       // TODO : This should probably delete the entry from the server as well
     } finally {
       setRevealLoading(false);
+      setCanReloadGame(true);
     }
   };
 
@@ -222,6 +230,15 @@ function Page() {
                 onClick={handleClaimStake}
               >
                 Claim Stake
+              </button>
+            )}
+
+            {canReloadGame && (
+              <button
+                className="bg-red-500 w-[40%] mx-auto px-2 py-2"
+                onClick={restartGame}
+              >
+                Reload Game
               </button>
             )}
           </div>
