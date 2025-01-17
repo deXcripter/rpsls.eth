@@ -26,7 +26,6 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
 
   const handleWalletConnection = async () => {
     try {
-      console.log("Connecting to wallet");
       const ethereum = window.ethereum;
       if (!ethereum) {
         alert("Please install MetaMask!");
@@ -37,7 +36,6 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
         method: "eth_requestAccounts",
       });
       setUserWallet(accounts[0]);
-      console.log("Connected", accounts[0]);
 
       return accounts[0];
     } catch (error) {

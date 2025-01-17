@@ -19,6 +19,7 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
   const [submittedMove, setSubmittedMove] = useState(false);
+  const [prompt, setPrompt] = useState<string>("Select one");
   const [salt, setSalt] = useState<null | number>(null);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ function Page() {
         contract: rpsContract,
       });
       setSubmittedMove(true);
+      setPrompt("Ask your opponent to play their move");
     } catch (err) {
       console.log(err);
       // setStartGame(false);
@@ -81,11 +83,6 @@ function Page() {
 
   const handleRevealMove = async () => {
     try {
-      // const res = await solveGame(
-      //   "0x0a12A8bEC1dB5961AD4B5464F3A4CEEfeD102b9D",
-      //   1,
-      //   1065
-      // );
       const res = await solveGame(contractAddress, userChoice!, salt!);
       console.log(res);
     } catch (err) {
@@ -160,7 +157,6 @@ function Page() {
         ) : (
           <button
             className="bg-green-600 w-[40%] mx-auto px-2 py-2"
-            // onClick={handleRevealMove}
             onClick={handleSubmitMove}
           >
             Submit Move

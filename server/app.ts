@@ -49,6 +49,20 @@ app.get("/join-game", (req, res) => {
   }
 });
 
+app.delete("/end-game", (req, res) => {
+  const { opponentWallet } = req.query;
+
+  const gameIndex = Games.findIndex(
+    (game) => game.opponentWallet === opponentWallet
+  );
+  if (gameIndex !== -1) {
+    Games.splice(gameIndex, 1);
+    res.send("Game ended");
+  } else {
+    res.status(404).send("Game not found");
+  }
+});
+
 app.use("/*", (req, res) => {
   res.send("This route does not exist");
 });

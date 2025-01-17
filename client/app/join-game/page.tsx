@@ -12,6 +12,7 @@ function page() {
   const { handleWalletConnection, userWallet } = useContext(TransactionContext);
   const [startGame, setStartGame] = useState(true);
   const [userChoice, setUserChoice] = useState<number | null>(null);
+  const [prompt, setPrompt] = useState<string>("Select one");
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
@@ -31,9 +32,9 @@ function page() {
         timeLeft?: number;
         stake: number;
       };
-      console.log(contractAddress, timeLeft, stake);
 
       await play(contractAddress, userChoice);
+      setPrompt("Ask your opponent to reveal move");
     } catch (err) {
       console.log(err);
     }
@@ -57,7 +58,7 @@ function page() {
 
       <div className={`${!startGame && "hidden"}`}>
         <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
-          Select one
+          {prompt}
         </h1>
         <div className="flex justify-center gap-4 mt-4">
           {elementsTag.map((name) => (
