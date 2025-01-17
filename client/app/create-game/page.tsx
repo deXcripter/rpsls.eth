@@ -3,7 +3,13 @@
 import Elements from "@/components/Elements";
 import Loader from "@/components/Loader";
 import { TransactionContext } from "@/context/TransactionContext";
-import { claimPlayer1Timeout, createGame, solveGame } from "@/contract";
+import {
+  checkWinForPlayer1,
+  checkWinForPlayer2,
+  claimPlayer1Timeout,
+  createGame,
+  solveGame,
+} from "@/contract";
 import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
@@ -69,7 +75,6 @@ function Page() {
         signer!
       );
 
-      if (!contractAddress) return;
       setContractAddress(contractAddress);
       await axiosInstance.post("/start-game", {
         contractAddress,
@@ -105,6 +110,19 @@ function Page() {
     try {
       await solveGame(contractAddress, userChoice!, salt!, signer!);
       setRevealed(true);
+      const player1Wins = await checkWinForPlayer1(
+        contractAddress,
+        userChoice!,
+        signer
+      );
+      const player2Wins = await checkWinForPlayer2(
+        contractAddress,
+        userChoice!,
+        signer
+      );
+      if (player1Wins) setPrompt("You win!");
+      if (player2Wins) setPrompt("You lose!");
+      else setPrompt("It's a draw!");
     } catch (err) {
       console.log(err);
       // TODO : This should probably delete the entry from the server as well
@@ -114,7 +132,7 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="max-h-screen h-screen">
       <div className="flex flex-col gap-4 w-[50%] m-auto mt-10">
         {userWallet ? (
           <div className="bg-green-400 px-4 py-2">{userWallet}</div>
@@ -156,54 +174,59 @@ function Page() {
       {loading && <Loader message="Creating Game" />}
       {revealLoading && <Loader message="Revealing Game" />}
       {!loading && !revealLoading && (
-        <div className={`${!startGame && "hidden"}`}>
-          <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
-            {prompt}
-          </h1>
-          <div className="flex justify-center gap-4 mt-4">
-            {elementsTag.map((name) => (
-              <Elements key={name} name={name} setUserChoice={setUserChoice} />
-            ))}
+        <>
+          <div className={`${!startGame && "hidden"}`}>
+            <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
+              {prompt}
+            </h1>
+            <div className="flex justify-center gap-4 mt-4">
+              {elementsTag.map((name) => (
+                <Elements
+                  key={name}
+                  name={name}
+                  setUserChoice={setUserChoice}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+          <div
+            className={`${
+              !startGame && "hidden"
+            } flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5`}
+          >
+            <div className="mx-auto">
+              {startGame && userChoice && (
+                <div>Your choice: {elementsTag[userChoice - 1]}</div>
+              )}
+            </div>
+            {submittedMove ? (
+              <button
+                className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
+                onClick={handleRevealMove}
+                disabled={revealed}
+              >
+                Reveal Move
+              </button>
+            ) : (
+              <button
+                className="bg-green-600 w-[40%] mx-auto px-2 py-2"
+                onClick={handleSubmitMove}
+              >
+                Submit Move
+              </button>
+            )}
+            {/* Only show this button when the user has played */}
+            {hasPlayed && (
+              <button
+                className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
+                onClick={handleClaimStake}
+              >
+                Claim Stake
+              </button>
+            )}
+          </div>
+        </>
       )}
-
-      <div
-        className={`${
-          !startGame && "hidden"
-        } flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5`}
-      >
-        <div className="mx-auto">
-          {startGame && userChoice && (
-            <div>Your choice: {elementsTag[userChoice - 1]}</div>
-          )}
-        </div>
-        {submittedMove ? (
-          <button
-            className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
-            onClick={handleRevealMove}
-            disabled={revealed}
-          >
-            Reveal Move
-          </button>
-        ) : (
-          <button
-            className="bg-green-600 w-[40%] mx-auto px-2 py-2"
-            onClick={handleSubmitMove}
-          >
-            Submit Move
-          </button>
-        )}
-        {/* Only show this button when the user has played */}
-        {hasPlayed && (
-          <button
-            className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
-            onClick={handleClaimStake}
-          >
-            Claim Stake
-          </button>
-        )}
-      </div>
     </div>
   );
 }

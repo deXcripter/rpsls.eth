@@ -70,3 +70,23 @@ export const claimPlayer1Timeout = async (
   const tx = await contract.j1Timeout();
   await tx.wait();
 };
+
+export const checkWinForPlayer1 = async (
+  contractAddress: string,
+  player1Move: number,
+  signer: ethers.ContractRunner
+) => {
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  const player2Move = await contract.c2();
+  return await contract.win(player1Move, player2Move);
+};
+
+export const checkWinForPlayer2 = async (
+  contractAddress: string,
+  player2Move: number,
+  signer: ethers.ContractRunner
+) => {
+  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  const player1Move = await contract.c2();
+  return await contract.win(player2Move, player1Move);
+};

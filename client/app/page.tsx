@@ -5,7 +5,7 @@ const defaultStyle =
 
 function Page() {
   return (
-    <div className="min-h-screen bg-slate-300 flex flex-col gap-5 justify-center align-middle">
+    <div className="max-h-screen h-screen flex flex-col gap-5 justify-center align-middle">
       <Button
         prompt="Create Game"
         className={`bg-green-400 ${defaultStyle}`}
