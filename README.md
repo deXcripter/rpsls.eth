@@ -1,22 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
 ## Game Instructions.
 
-#### NOTE -- Even though you can simulate both `Player1` and `Player2` from a single browser, I recommend you using two different browsers or even to different PCs two play the game.
+#### NOTE -- Even though you can simulate both `Player1` and `Player2` from a single browser, I recommend you using two different browsers or even two different PCs to play the game.
 
 - `Player 1` creates a game with the wallet address of player 2, `stake` some eth and make his commitment.
 - `Player 2` just connects his ethereum account (it must be the same address `Player 1` used to create the game), and clicks on `Join Game`.
