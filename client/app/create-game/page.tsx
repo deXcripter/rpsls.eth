@@ -49,6 +49,8 @@ function Page() {
   };
 
   const handleSubmitMove = async () => {
+    if (!signer) return alert("There is no signer presnet");
+
     if (!userChoice) {
       alert("Please select a move");
       return;
@@ -84,6 +86,7 @@ function Page() {
   };
 
   const handleRevealMove = async () => {
+    if (!signer) return alert("There is no signer presnet");
     try {
       const res = await solveGame(contractAddress, userChoice!, salt!, signer!);
       console.log(res);
@@ -133,7 +136,7 @@ function Page() {
       ) : (
         <div className={`${!startGame && "hidden"}`}>
           <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
-            Select one
+            {prompt}
           </h1>
           <div className="flex justify-center gap-4 mt-4">
             {elementsTag.map((name) => (

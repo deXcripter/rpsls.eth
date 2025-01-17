@@ -5,20 +5,22 @@ import { TransactionContext } from "@/context/TransactionContext";
 import { play, claimPlayer1Timeout } from "@/contract";
 import axiosInstance from "@/utils/axios";
 import { useContext, useState } from "react";
+import Loader from "@/components/Loader";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
 function page() {
   const { handleWalletConnection, userWallet, signer } =
     useContext(TransactionContext);
-  const [startGame, setStartGame] = useState(true);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [prompt, setPrompt] = useState<string>("Select one");
   const [contractAddress, setContractAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [hasPlayed, setHasPlayed] = useState(false);
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
-    console.log("going");
+    setLoading(true);
     try {
       const res = await axiosInstance.get("/join-game", {
         params: {
@@ -35,11 +37,13 @@ function page() {
       };
       setContractAddress(contractAddress);
       await play(contractAddress, userChoice, signer!);
-      setPrompt("Ask your opponent to reveal move");
-      setStartGame(false); // Set to false to indicate the game has started
+      setPrompt("Ask your opponent to reveal move"); // update the prompt on the UI
+      setHasPlayed(true);
     } catch (err) {
       setPrompt("Ask Player 1 to start the game with your wallet address");
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,7 +74,7 @@ function page() {
         )}
       </div>
 
-      <div className={`${!startGame && "hidden"}`}>
+      <div className={``}>
         <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
           {prompt}
         </h1>
@@ -83,23 +87,26 @@ function page() {
 
       <div className="flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5">
         <div className="mx-auto">
-          {startGame && userChoice && (
+          {hasPlayed && userChoice && (
             <div>Your choice: {elementsTag[userChoice - 1]}</div>
           )}
         </div>
+        {loading ? (
+          <Loader />
+        ) : (
+          <button
+            className={`${
+              userChoice && userWallet ? "bg-green-600" : "bg-gray-600 "
+            } w-[40%] mx-auto px-2 py-2`}
+            onClick={handleSubmitMove}
+            disabled={!userChoice || !userWallet}
+          >
+            Submit Move
+          </button>
+        )}
 
-        <button
-          className={`${
-            userChoice && userWallet ? "bg-green-600" : "bg-gray-600 "
-          } w-[40%] mx-auto px-2 py-2`}
-          onClick={handleSubmitMove}
-          disabled={!userChoice || !userWallet}
-        >
-          Submit Move
-        </button>
-
-        {/* Claim Stake Button */}
-        {!startGame && (
+        {/* Only show this button when the user has played */}
+        {hasPlayed && (
           <button
             className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
             onClick={handleClaimStake}
