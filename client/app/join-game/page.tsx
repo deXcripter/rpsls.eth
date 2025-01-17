@@ -2,7 +2,7 @@
 
 import Elements from "@/components/Elements";
 import { TransactionContext } from "@/context/TransactionContext";
-import { play, claimPlayer1Timeout } from "@/contract";
+import { play, claimPlayer2Timeout } from "@/contract";
 import axiosInstance from "@/utils/axios";
 import { useContext, useState } from "react";
 import Loader from "@/components/Loader";
@@ -50,11 +50,11 @@ function page() {
   const handleClaimStake = async () => {
     if (!contractAddress) return;
     try {
-      await claimPlayer1Timeout(contractAddress, signer!);
+      await claimPlayer2Timeout(contractAddress, signer!);
       setPrompt("Stake claimed successfully!");
     } catch (err) {
       console.error("Error claiming stake:", err);
-      setPrompt("Failed to claim stake.");
+      setPrompt("Failed to claim stake. Please try again later");
     }
   };
 

@@ -3,7 +3,7 @@
 import Elements from "@/components/Elements";
 import Loader from "@/components/Loader";
 import { TransactionContext } from "@/context/TransactionContext";
-import { createGame, solveGame } from "@/contract";
+import { claimPlayer1Timeout, createGame, solveGame } from "@/contract";
 import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
@@ -22,6 +22,7 @@ function Page() {
   const [submittedMove, setSubmittedMove] = useState(false);
   const [prompt, setPrompt] = useState<string>("Select one");
   const [salt, setSalt] = useState<null | number>(null);
+  const [hasPlayed, setHasPlayed] = useState(false);
 
   useEffect(() => {
     setSalt(Math.round(Math.random() * 10000));
@@ -77,11 +78,23 @@ function Page() {
       });
       setSubmittedMove(true);
       setPrompt("Ask your opponent to play their move");
+      setHasPlayed(true);
     } catch (err) {
       console.log(err);
       // setStartGame(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClaimStake = async () => {
+    if (!contractAddress) return;
+    try {
+      await claimPlayer1Timeout(contractAddress, signer!);
+      setPrompt("Stake claimed successfully!");
+    } catch (err) {
+      console.error("Error claiming stake:", err);
+      setPrompt("Failed to claim stake. Please try again later");
     }
   };
 
@@ -165,6 +178,15 @@ function Page() {
             onClick={handleSubmitMove}
           >
             Submit Move
+          </button>
+        )}
+        {/* Only show this button when the user has played */}
+        {hasPlayed && (
+          <button
+            className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
+            onClick={handleClaimStake}
+          >
+            Claim Stake
           </button>
         )}
       </div>
