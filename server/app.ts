@@ -29,7 +29,22 @@ app.post("/start-game", (req, res) => {
     contract,
   } = req.body;
 
-  Games.push({ opponentWallet, contractAddress, timeLeft, stake, contract });
+  const existingGameIndex = Games.findIndex(
+    (game) => game.opponentWallet === opponentWallet
+  );
+
+  if (existingGameIndex !== -1) {
+    Games[existingGameIndex] = {
+      opponentWallet,
+      contractAddress,
+      timeLeft,
+      stake,
+      contract,
+    };
+  } else {
+    Games.push({ opponentWallet, contractAddress, timeLeft, stake, contract });
+    console.log(`New game started for ${opponentWallet}`);
+  }
 
   console.log(Games);
   res.send("Game started");
