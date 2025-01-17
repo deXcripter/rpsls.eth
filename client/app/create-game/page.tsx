@@ -23,6 +23,7 @@ function Page() {
   const [prompt, setPrompt] = useState<string>("Select one");
   const [salt, setSalt] = useState<null | number>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
+  const [revealLoading, setRevealLoading] = useState(false);
 
   useEffect(() => {
     setSalt(Math.round(Math.random() * 10000));
@@ -99,11 +100,15 @@ function Page() {
 
   const handleRevealMove = async () => {
     if (!signer) return alert("There is no signer presnet");
+    setRevealLoading(true);
     try {
       const res = await solveGame(contractAddress, userChoice!, salt!, signer!);
+      console.log(res);
     } catch (err) {
       console.log(err);
       // TODO : This should probably delete the entry from the server as well
+    } finally {
+      setRevealLoading(false);
     }
   };
 
@@ -138,13 +143,18 @@ function Page() {
           onChange={(e) => setStake(Number(e.target.value))}
         />
         <button className="bg-blue-400 px-4 py-2" onClick={handleStartGame}>
-          Start Game
+          Show elements
         </button>
       </div>
 
-      {loading ? (
-        <Loader message="Creating Game" />
-      ) : (
+      {/*
+       * If loading is true show the Loader component with the message "Creating Game"
+       * If revealLoading is true, show the Loader component with the message "Revealing Game"
+       * Else, show the game elements and the prompt
+       */}
+      {loading && <Loader message="Creating Game" />}
+      {revealLoading && <Loader message="Revealing Game" />}
+      {!loading && !revealLoading && (
         <div className={`${!startGame && "hidden"}`}>
           <h1 className="text-center text-4xl mt-10 text-yellow-400 font-semibold">
             {prompt}
@@ -157,7 +167,11 @@ function Page() {
         </div>
       )}
 
-      <div className="flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5">
+      <div
+        className={`${
+          !startGame && "hidden"
+        } flex mx-auto w-[50%] mt-[5%] text-lg flex-col gap-5`}
+      >
         <div className="mx-auto">
           {startGame && userChoice && (
             <div>Your choice: {elementsTag[userChoice - 1]}</div>

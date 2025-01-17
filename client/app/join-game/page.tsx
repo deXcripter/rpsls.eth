@@ -91,7 +91,7 @@ function page() {
           )}
         </div>
         {loading ? (
-          <Loader />
+          <Loader message="Submitting move" />
         ) : (
           <button
             className={`${
