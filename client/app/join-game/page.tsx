@@ -2,7 +2,7 @@
 
 import Elements from "@/components/Elements";
 import { TransactionContext } from "@/context/TransactionContext";
-import { play } from "@/contract";
+import { play, claimPlayer1Timeout } from "@/contract";
 import axiosInstance from "@/utils/axios";
 import { useContext, useState } from "react";
 
@@ -13,6 +13,7 @@ function page() {
   const [startGame, setStartGame] = useState(true);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [prompt, setPrompt] = useState<string>("Select one");
+  const [contractAddress, setContractAddress] = useState("");
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
@@ -23,7 +24,6 @@ function page() {
           opponentWallet: userWallet,
         },
       });
-      console.log("going");
 
       const { contractAddress, timeLeft, stake, contract } = res.data as {
         opponentWallet: number;
@@ -32,11 +32,24 @@ function page() {
         timeLeft?: number;
         stake: number;
       };
-
+      setContractAddress(contractAddress);
       await play(contractAddress, userChoice);
       setPrompt("Ask your opponent to reveal move");
+      setStartGame(false); // Set to false to indicate the game has started
     } catch (err) {
+      setPrompt("Ask Player 1 to start the game with your wallet address");
       console.log(err);
+    }
+  };
+
+  const handleClaimStake = async () => {
+    if (!contractAddress) return;
+    try {
+      await claimPlayer1Timeout(contractAddress);
+      setPrompt("Stake claimed successfully!");
+    } catch (err) {
+      console.error("Error claiming stake:", err);
+      setPrompt("Failed to claim stake.");
     }
   };
 
@@ -73,12 +86,26 @@ function page() {
             <div>Your choice: {elementsTag[userChoice - 1]}</div>
           )}
         </div>
+
         <button
-          className="bg-green-600 w-[40%] mx-auto px-2 py-2"
+          className={`${
+            userChoice && userWallet ? "bg-green-600" : "bg-gray-600 "
+          } w-[40%] mx-auto px-2 py-2`}
           onClick={handleSubmitMove}
+          disabled={!userChoice || !userWallet}
         >
           Submit Move
         </button>
+
+        {/* Claim Stake Button */}
+        {!startGame && (
+          <button
+            className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
+            onClick={handleClaimStake}
+          >
+            Claim Stake
+          </button>
+        )}
       </div>
     </div>
   );

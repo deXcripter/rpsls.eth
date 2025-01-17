@@ -2,8 +2,9 @@
 
 import axios from "axios";
 
-const baseUrl = process.env.BACKEND_URL || "http://localhost:4444";
+const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 if (!baseUrl) {
+  console.log(process.env);
   throw new Error("BACKEND_URL is not defined");
 }
 
