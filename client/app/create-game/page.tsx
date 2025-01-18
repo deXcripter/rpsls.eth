@@ -90,7 +90,6 @@ function Page() {
     } catch (err) {
       setPrompt("Something went wrong. Please try again");
       setCanReloadGame(true);
-      // setStartGame(false);
     } finally {
       setLoading(false);
     }
@@ -107,32 +106,34 @@ function Page() {
       setPrompt("Stake claimed successfully!");
     } catch (err) {
       console.error("Error claiming stake:", err);
-      setPrompt("Failed to claim stake. Please try again in 5 mins");
+      setPrompt("Failed to claim stake. Please try again in <5 mins");
     }
   };
 
   const handleRevealMove = async () => {
     if (!signer) return alert("Please refresh your browser and try again (");
+    if (!userChoice || !salt) return;
     setRevealLoading(true);
     try {
-      await solveGame(contractAddress, userChoice!, salt!, signer!);
-      setRevealed(true);
+      await solveGame(contractAddress, userChoice, salt, signer!);
+      // setRevealed(true);
       const player1Wins = await checkWinForPlayer1(
         contractAddress,
-        userChoice!,
+        userChoice,
         signer
       );
       const player2Wins = await checkWinForPlayer2(
         contractAddress,
-        userChoice!,
+        userChoice,
         signer
       );
-      if (player1Wins) setPrompt("You win!");
-      if (player2Wins) setPrompt("You lose!");
-      else setPrompt("It's a draw!");
+      if (player1Wins && !player2Wins) setPrompt("You win!");
+      if (!player1Wins && player2Wins) setPrompt("You lose!");
+      else if (!player1Wins && !player2Wins) setPrompt("It's a draw!");
     } catch (err) {
-      console.log(err);
       // TODO : This should probably delete the entry from the server as well
+      setPrompt("Failed to reveal move. Please try again");
+      setCanReloadGame(true);
     } finally {
       setRevealLoading(false);
       setCanReloadGame(true);
@@ -140,7 +141,7 @@ function Page() {
   };
 
   return (
-    <div className="max-h-screen h-screen">
+    <div className="min-h-screen">
       <div className="flex flex-col gap-4 w-[50%] m-auto mt-10">
         {userWallet ? (
           <div className="bg-green-400 px-4 py-2">{userWallet}</div>

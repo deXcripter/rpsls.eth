@@ -1,25 +1,11 @@
 const contractABI = [
   {
-    constant: true,
-    inputs: [
-      {
-        name: "_c1",
-        type: "uint8",
-      },
-      {
-        name: "_c2",
-        type: "uint8",
-      },
-    ],
-    name: "win",
-    outputs: [
-      {
-        name: "w",
-        type: "bool",
-      },
-    ],
+    constant: false,
+    inputs: [],
+    name: "j1Timeout",
+    outputs: [],
     payable: false,
-    stateMutability: "view",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -32,13 +18,60 @@ const contractABI = [
     type: "function",
   },
   {
+    constant: false,
+    inputs: [
+      {
+        name: "_c2",
+        type: "uint8",
+      },
+    ],
+    name: "play",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_c1",
+        type: "uint8",
+      },
+      {
+        name: "_salt",
+        type: "uint256",
+      },
+    ],
+    name: "solve",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        name: "_c1Hash",
+        type: "bytes32",
+      },
+      {
+        name: "_j2",
+        type: "address",
+      },
+    ],
+    payable: true,
+    stateMutability: "payable",
+    type: "constructor",
+  },
+  {
     constant: true,
     inputs: [],
-    name: "stake",
+    name: "c1Hash",
     outputs: [
       {
         name: "",
-        type: "uint256",
+        type: "bytes32",
       },
     ],
     payable: false,
@@ -62,29 +95,15 @@ const contractABI = [
   {
     constant: true,
     inputs: [],
-    name: "c1Hash",
+    name: "j1",
     outputs: [
       {
         name: "",
-        type: "bytes32",
+        type: "address",
       },
     ],
     payable: false,
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: "_c2",
-        type: "uint8",
-      },
-    ],
-    name: "play",
-    outputs: [],
-    payable: true,
-    stateMutability: "payable",
     type: "function",
   },
   {
@@ -116,44 +135,17 @@ const contractABI = [
     type: "function",
   },
   {
-    constant: false,
-    inputs: [
-      {
-        name: "_c1",
-        type: "uint8",
-      },
-      {
-        name: "_salt",
-        type: "uint256",
-      },
-    ],
-    name: "solve",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
     constant: true,
     inputs: [],
-    name: "j1",
+    name: "stake",
     outputs: [
       {
         name: "",
-        type: "address",
+        type: "uint256",
       },
     ],
     payable: false,
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [],
-    name: "j1Timeout",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -171,19 +163,27 @@ const contractABI = [
     type: "function",
   },
   {
+    constant: true,
     inputs: [
       {
-        name: "_c1Hash",
-        type: "bytes32",
+        name: "_c1",
+        type: "uint8",
       },
       {
-        name: "_j2",
-        type: "address",
+        name: "_c2",
+        type: "uint8",
       },
     ],
-    payable: true,
-    stateMutability: "payable",
-    type: "constructor",
+    name: "win",
+    outputs: [
+      {
+        name: "w",
+        type: "bool",
+      },
+    ],
+    payable: false,
+    stateMutability: "view",
+    type: "function",
   },
 ];
 
