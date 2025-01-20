@@ -30,28 +30,10 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
   const [signer, setSigner] = useState<any>(null);
 
   useEffect(() => {
-    async function loadEthWindow() {
-      // Check if window.ethereum is available
-      if (!window.ethereum) {
-        alert("Please install MetaMask!");
-        return;
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const chain = await provider.getNetwork();
-      if (Number(chain.chainId) !== 11155111) {
-        alert("Switching you to the sepolia network");
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xaa36a7" }],
-        });
-      } else console.log("Connected to the sepolia network");
-      const signer = await provider.getSigner();
-      setProvider(provider);
-      setSigner(signer);
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return;
     }
-
-    loadEthWindow();
   }, []);
 
   const handleWalletConnection = async () => {
@@ -70,6 +52,20 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
       if (!validAddress) return alert("Invalid wallet address");
 
       setUserWallet(validAddress as string);
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const chain = await provider.getNetwork();
+      if (Number(chain.chainId) !== 11155111) {
+        alert("Switching you to the sepolia network");
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0xaa36a7" }],
+        });
+      } else console.log("Connected to the sepolia network");
+      const signer = await provider.getSigner();
+      setProvider(provider);
+      setSigner(signer);
+
       return validAddress as string;
     } catch (error) {}
   };
