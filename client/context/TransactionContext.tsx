@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { isValidEthereumAddress } from "@/utils/wallet-validator";
 
 // Extend the Window interface to include the ethereum property
 declare global {
@@ -10,7 +11,6 @@ declare global {
 }
 
 interface iTransactionContext {
-  transaction: boolean;
   userWallet: string | null;
   handleWalletConnection: () => void;
   provider: any;
@@ -18,7 +18,6 @@ interface iTransactionContext {
 }
 
 export const TransactionContext = createContext<iTransactionContext>({
-  transaction: false,
   userWallet: null,
   handleWalletConnection: () => {},
   provider: null,
@@ -26,13 +25,18 @@ export const TransactionContext = createContext<iTransactionContext>({
 });
 
 function TransactionProvider({ children }: { children: React.ReactNode }) {
-  const [transaction, setTransaction] = useState(false);
   const [userWallet, setUserWallet] = useState<string | null>(null);
   const [provider, setProvider] = useState<any>(null);
   const [signer, setSigner] = useState<any>(null);
 
   useEffect(() => {
     async function loadEthWindow() {
+      // Check if window.ethereum is available
+      if (!window.ethereum) {
+        alert("Please install MetaMask!");
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const chain = await provider.getNetwork();
       if (Number(chain.chainId) !== 11155111) {
@@ -46,6 +50,7 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
       setProvider(provider);
       setSigner(signer);
     }
+
     loadEthWindow();
   }, []);
 
@@ -60,16 +65,18 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
-      setUserWallet(accounts[0]);
 
-      return accounts[0];
+      const validAddress = isValidEthereumAddress(accounts[0]);
+      if (!validAddress) return alert("Invalid wallet address");
+
+      setUserWallet(validAddress as string);
+      return validAddress as string;
     } catch (error) {}
   };
 
   return (
     <TransactionContext.Provider
       value={{
-        transaction,
         userWallet,
         handleWalletConnection,
         provider,

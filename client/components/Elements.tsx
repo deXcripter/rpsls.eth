@@ -9,7 +9,6 @@ function Elements({
   name: string;
   setUserChoice: (value: number) => void;
 }) {
-  //
   if (!elements.includes(name)) return null;
 
   return (
@@ -25,8 +24,8 @@ function Elements({
           <Image
             src={`/images/icon-${name.toLocaleLowerCase()}.svg`}
             alt={name}
-            width={50}
-            height={50}
+            width={45}
+            height={45}
             className="z-10"
           />
         </div>
