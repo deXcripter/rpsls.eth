@@ -14,6 +14,7 @@ import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
 import { sendToken } from "@/utils/jwt-hash";
+import { showErrorToast } from "@/utils/toast";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
@@ -21,7 +22,7 @@ function Page() {
   const [startGame, setStartGame] = useState(false);
   const [opponentWallet, setOpponentWallet] = useState("");
   const [stake, setStake] = useState<number | string>("");
-  const { handleWalletConnection, userWallet, signer } =
+  const { handleWalletConnection, userWallet, signer, connectingWallet } =
     useContext(TransactionContext);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -45,16 +46,13 @@ function Page() {
 
   const handleStartGame = () => {
     if (!opponentWallet) {
-      alert("Please enter your opponent's wallet address");
-      return;
+      return showErrorToast("Please enter your opponent's wallet address");
     }
     if (!userWallet) {
-      alert("Please connect your wallet");
-      return;
+      return showErrorToast("Please connect your wallet");
     }
     if (!stake || typeof Number(stake) !== "number") {
-      alert("Please enter a valid stake amount");
-      return;
+      return showErrorToast("Please enter a valid stake amount");
     }
 
     setStartGame(true);
@@ -91,6 +89,7 @@ function Page() {
       setHasPlayed(true);
     } catch (err) {
       setPrompt("Something went wrong. Please try again");
+      console.log(err);
       setCanReloadGame(true);
     } finally {
       setLoading(false);
@@ -146,12 +145,19 @@ function Page() {
     <div className="min-h-screen">
       <div className="flex flex-col gap-4 w-[50%] m-auto mt-10">
         {userWallet ? (
-          <div className="bg-green-400 px-4 py-2">{userWallet}</div>
+          <div
+            className={`${
+              !connectingWallet ? "bg-green-400" : "bg-slate-600"
+            } px-4 py-2`}
+          >
+            {userWallet}
+          </div>
         ) : (
           <button
             type="button"
             className="bg-green-400 px-4 py-2"
             onClick={() => handleWalletConnection()}
+            disabled={connectingWallet || userWallet ? true : false}
           >
             Connect Wallet
           </button>

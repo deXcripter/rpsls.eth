@@ -2,6 +2,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { isValidEthereumAddress } from "@/utils/wallet-validator";
+import { showErrorToast, showSuccessToast } from "@/utils/toast";
 
 // Extend the Window interface to include the ethereum property
 declare global {
@@ -15,6 +16,7 @@ interface iTransactionContext {
   handleWalletConnection: () => void;
   provider: any;
   signer: ethers.ContractRunner | null;
+  connectingWallet: boolean;
 }
 
 export const TransactionContext = createContext<iTransactionContext>({
@@ -22,12 +24,14 @@ export const TransactionContext = createContext<iTransactionContext>({
   handleWalletConnection: () => {},
   provider: null,
   signer: null,
+  connectingWallet: false,
 });
 
 function TransactionProvider({ children }: { children: React.ReactNode }) {
   const [userWallet, setUserWallet] = useState<string | null>(null);
   const [provider, setProvider] = useState<any>(null);
   const [signer, setSigner] = useState<any>(null);
+  const [connectingWallet, setConnectingWallet] = useState(false);
 
   useEffect(() => {
     if (!window.ethereum) {
@@ -37,12 +41,14 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleWalletConnection = async () => {
+    setConnectingWallet(true);
     try {
       const ethereum = window.ethereum;
       if (!ethereum) {
-        alert("Please install MetaMask!");
-        return;
+        return showErrorToast("Please install MetaMask!");
       }
+
+      console.log("Connecting to wallet...");
 
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
@@ -65,9 +71,20 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
       const signer = await provider.getSigner();
       setProvider(provider);
       setSigner(signer);
+      showSuccessToast("Wallet connected");
 
       return validAddress as string;
-    } catch (error) {}
+    } catch (error) {
+      // disconnect wallet
+      setUserWallet(null);
+      showErrorToast("An error occurred. Please try again");
+      await window.ethereum.request({
+        method: "wallet_",
+        params: [{ eth_accounts: {} }],
+      });
+    } finally {
+      setConnectingWallet(false);
+    }
   };
 
   return (
@@ -77,6 +94,7 @@ function TransactionProvider({ children }: { children: React.ReactNode }) {
         handleWalletConnection,
         provider,
         signer,
+        connectingWallet,
       }}
     >
       {children}
