@@ -13,6 +13,7 @@ import {
 import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
+import { sendToken } from "@/utils/jwt-hash";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
@@ -27,14 +28,15 @@ function Page() {
   const [contractAddress, setContractAddress] = useState("");
   const [submittedMove, setSubmittedMove] = useState(false);
   const [prompt, setPrompt] = useState<string>("Select one");
-  const [salt, setSalt] = useState<null | number>(null);
+  const [salt, setSalt] = useState<null | string>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [canReloadGame, setCanReloadGame] = useState(false);
 
   useEffect(() => {
-    setSalt(Math.round(Math.random() * 10000));
+    const token = sendToken();
+    setSalt(token);
   }, []);
 
   const handleOpponentSetWallet = (e: React.ChangeEvent<HTMLInputElement>) => {

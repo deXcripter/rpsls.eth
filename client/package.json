@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@types/axios": "^0.9.36",
+    "@types/react-toastify": "^4.0.2",
     "axios": "^1.7.9",
     "ethers": "^6.13.5",
     "next": "15.1.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.3"
   },
   "devDependencies": {
     "@types/node": "^20",
