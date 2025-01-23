@@ -27,8 +27,8 @@ io.on("connection", (socket) => {
         });
         console.log("user 2 made their move");
     });
-    socket.on("game-won", (gameData) => {
-        socket.emit("game-over", {
+    socket.on("game-revealed", (gameData) => {
+        socket.broadcast.emit("game-over", {
             gameData,
         });
     });

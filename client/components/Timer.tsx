@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 
 const CountdownTimer = ({
-  countDown = 300,
+  timeLeft: timeLeft,
+  setTimeLeft = () => {},
+  handler = () => {},
 }: {
-  countDown: number;
-  fn: Function;
+  timeLeft: number;
+  setTimeLeft: (time: number | ((prevTime: number) => number)) => void;
+  handler: () => void;
 }) => {
-  const [timeLeft, setTimeLeft] = useState(countDown);
-
   useEffect(() => {
     if (timeLeft <= 0) return;
 
     const intervalId = setInterval(() => {
-      setTimeLeft((prevTime) => prevTime - 1);
+      setTimeLeft((prevTime: number) => prevTime - 1);
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [timeLeft]);
+  }, [timeLeft, setTimeLeft]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -28,10 +29,16 @@ const CountdownTimer = ({
   };
 
   return (
-    <div style={{ textAlign: "center", fontSize: "2rem", marginTop: "20px" }}>
-      <h1>Countdown Timer</h1>
-      <p>{formatTime(timeLeft)}</p>
-      {timeLeft <= 0 && <h2>Time's up!</h2>}
+    <div style={{ textAlign: "center", fontSize: "2rem", marginTop: "2px" }}>
+      {timeLeft > 0 && <p>{formatTime(timeLeft)}</p>}
+      {timeLeft <= 0 && (
+        <button
+          className={`bg-blue-600 w-[40%] text-sm mx-auto px-2 py-2`}
+          onClick={handler}
+        >
+          Claim Stake
+        </button>
+      )}
     </div>
   );
 };

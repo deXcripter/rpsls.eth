@@ -16,6 +16,7 @@ import { useState, useContext, useEffect } from "react";
 import { sendHash } from "@/utils/jwt-hash";
 import { showErrorToast } from "@/utils/toast";
 import SocketContext from "@/context/SocketContext";
+import CountdownTimer from "@/components/Timer";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
@@ -26,14 +27,16 @@ function Page() {
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
-  const [submittedMove, setSubmittedMove] = useState(false);
   const [prompt, setPrompt] = useState<string>("Select one");
   const [salt, setSalt] = useState<null | number>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
+  const [canRevealMove, setCanRevealMove] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [time, setTime] = useState(300);
   const [canReloadGame, setCanReloadGame] = useState(false);
+  const [claimedStake, setClaimedStake] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
 
   const { handleWalletConnection, userWallet, signer, connectingWallet } =
     useContext(TransactionContext);
@@ -49,6 +52,7 @@ function Page() {
     const handleUser2Played = () => {
       setTime(300);
       setPrompt("Your opponent has played. Reveal your move now");
+      setCanRevealMove(true);
     };
 
     socket?.on("user-2-played", handleUser2Played);
@@ -109,7 +113,6 @@ function Page() {
         stake,
         contract: rpsContract,
       });
-      setSubmittedMove(true);
       setPrompt("Ask your opponent to play their move");
       setHasPlayed(true);
     } catch (err) {
@@ -130,6 +133,8 @@ function Page() {
     try {
       await claimPlayer1Timeout(contractAddress, signer!);
       setPrompt("Stake claimed successfully!");
+      setClaimedStake(true);
+      setGameOver(true);
     } catch (err) {
       console.error("Error claiming stake:", err);
       setPrompt("Failed to claim stake. Please try again in <5 mins");
@@ -153,28 +158,32 @@ function Page() {
         signer
       );
       if (player1Wins && !player2Wins) {
-        socket?.emit("game-won", {
+        socket?.emit("game-revealed", {
           contractAddress,
           winner: userWallet,
+          summary: "Player 1 wins",
         });
         setPrompt("You win!");
       }
       if (!player1Wins && player2Wins) {
         setPrompt("You lose!");
-        socket?.emit("game-won", {
+        socket?.emit("game-revealed", {
           contractAddress,
           winner: userWallet,
+          summary: "Player 2 wins",
         });
       } else if (!player1Wins && !player2Wins) {
         setPrompt("It's a draw!");
-        socket?.emit("game-won", {
+        socket?.emit("game-revealed", {
           contractAddress,
           winner: "draw",
+          summary: "It's a draw",
         });
+        setCanReloadGame(true);
+        setCanRevealMove(false);
+        setGameOver(true);
       }
     } catch (err) {
-      // TODO : This should probably delete the entry from the server as well
-      setPrompt("Failed to reveal move. Please try again");
       setCanReloadGame(true);
       console.log(err);
     } finally {
@@ -258,7 +267,9 @@ function Page() {
                 <div>Your choice: {elementsTag[userChoice - 1]}</div>
               )}
             </div>
-            {submittedMove ? (
+
+            {/* Only show after second player has played. */}
+            {canRevealMove && (
               <button
                 className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
                 onClick={handleRevealMove}
@@ -266,7 +277,10 @@ function Page() {
               >
                 Reveal Move
               </button>
-            ) : (
+            )}
+
+            {/* Only show this button when the user has not played */}
+            {!hasPlayed && (
               <button
                 className="bg-green-600 w-[40%] mx-auto px-2 py-2"
                 onClick={handleSubmitMove}
@@ -274,14 +288,14 @@ function Page() {
                 Submit Move
               </button>
             )}
+
             {/* Only show this button when the user has played */}
-            {hasPlayed && (
-              <button
-                className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
-                onClick={handleClaimStake}
-              >
-                Claim Stake
-              </button>
+            {hasPlayed && !gameOver && !claimedStake && (
+              <CountdownTimer
+                setTimeLeft={setTime}
+                timeLeft={time}
+                handler={handleClaimStake}
+              />
             )}
 
             {canReloadGame && (

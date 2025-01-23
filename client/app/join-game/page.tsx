@@ -4,9 +4,11 @@ import Elements from "@/components/Elements";
 import { TransactionContext } from "@/context/TransactionContext";
 import { play, claimPlayer2Timeout } from "@/contract";
 import axiosInstance from "@/utils/axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 import SocketContext from "@/context/SocketContext";
+import CountdownTimer from "@/components/Timer";
+import { showErrorToast } from "@/utils/toast";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
@@ -17,9 +19,26 @@ function page() {
   const [loading, setLoading] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [canReloadGame, setCanReloadGame] = useState(false);
+  const [time, setTime] = useState(300);
+  const [gameOver, setGameOver] = useState(false);
   const { handleWalletConnection, userWallet, signer } =
     useContext(TransactionContext);
   const { socket } = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("game-over", (data) => {
+      const winner = data.gameData.summary === "Player 2 winner";
+      winner && setPrompt("You won!");
+      !winner && setPrompt(`${data.gameData.summary}`);
+      setCanReloadGame(true);
+    });
+
+    return () => {
+      socket.off("game-over");
+    };
+  }, [socket]);
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
@@ -50,17 +69,14 @@ function page() {
         contract,
       });
     } catch (err) {
-      setPrompt("Ask Player 1 to re-start the game with your wallet address");
+      // setPrompt("Ask Player 1 to re-start the game with your wallet address");
+      showErrorToast("Failed to join game. Please try again");
       setCanReloadGame(true);
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
-
-  socket?.on("game-over", (data) => {
-    setPrompt(`${data.contractAddress} has won the game`);
-    setCanReloadGame(true);
-  });
 
   const handleClaimStake = async () => {
     if (!contractAddress) return;
@@ -109,10 +125,8 @@ function page() {
         <div className="mx-auto">
           {userChoice && <div>Your choice: {elementsTag[userChoice - 1]}</div>}
         </div>
-
-        {loading ? (
-          <Loader message="Submitting move" />
-        ) : (
+        {loading && <Loader message="Submitting move" />}
+        {!loading && !hasPlayed && !gameOver && (
           <button
             type="button"
             className={`${
@@ -124,15 +138,13 @@ function page() {
             Submit Move
           </button>
         )}
-
         {/* Only show this button when the user has played */}
-        {hasPlayed && (
-          <button
-            className="bg-blue-600 w-[40%] mx-auto px-2 py-2"
-            onClick={handleClaimStake}
-          >
-            Claim Stake
-          </button>
+        {hasPlayed && !gameOver && (
+          <CountdownTimer
+            setTimeLeft={setTime}
+            timeLeft={time}
+            handler={handleClaimStake}
+          />
         )}
         {canReloadGame && (
           <button
