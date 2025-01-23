@@ -36,7 +36,7 @@ export const play = async (
 export const solveGame = async (
   contractAddress: string,
   move: number,
-  salt: string,
+  salt: number,
   signer: ethers.ContractRunner
 ) => {
   const contract = new ethers.Contract(contractAddress, contractABI, signer);

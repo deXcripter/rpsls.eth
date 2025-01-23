@@ -1,7 +1,7 @@
-import crypto from "crypto";
-
-export const sendToken = () => {
-  const hash = crypto.createHash("sha256");
-  hash.update(process.env.NEXT_PUBLIC_JWT_SECRET as string);
-  return hash.digest("hex");
+export const sendHash = () => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  const securehash =
+    (array[0] * parseInt(process.env.NEXT_PUBLIC_SECRET as string)) / 2;
+  return Number(securehash.toString().slice(0, 10));
 };

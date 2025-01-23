@@ -13,8 +13,9 @@ import {
 import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
-import { sendToken } from "@/utils/jwt-hash";
+import { sendHash } from "@/utils/jwt-hash";
 import { showErrorToast } from "@/utils/toast";
+import SocketContext from "@/context/SocketContext";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
@@ -22,23 +23,40 @@ function Page() {
   const [startGame, setStartGame] = useState(false);
   const [opponentWallet, setOpponentWallet] = useState("");
   const [stake, setStake] = useState<number | string>("");
-  const { handleWalletConnection, userWallet, signer, connectingWallet } =
-    useContext(TransactionContext);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
   const [submittedMove, setSubmittedMove] = useState(false);
   const [prompt, setPrompt] = useState<string>("Select one");
-  const [salt, setSalt] = useState<null | string>(null);
+  const [salt, setSalt] = useState<null | number>(null);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [time, setTime] = useState(300);
   const [canReloadGame, setCanReloadGame] = useState(false);
 
+  const { handleWalletConnection, userWallet, signer, connectingWallet } =
+    useContext(TransactionContext);
+  const { socket } = useContext(SocketContext);
+
   useEffect(() => {
-    const token = sendToken();
-    setSalt(token);
+    const hash = sendHash();
+    setSalt(hash);
   }, []);
+
+  // Add a flag or use useCallback to prevent multiple listeners
+  useEffect(() => {
+    const handleUser2Played = () => {
+      setTime(300);
+      setPrompt("Your opponent has played. Reveal your move now");
+    };
+
+    socket?.on("user-2-played", handleUser2Played);
+
+    return () => {
+      socket?.off("user-2-played", handleUser2Played);
+    };
+  }, [socket]);
 
   const handleOpponentSetWallet = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOpponentWallet(e.target.value);
@@ -65,11 +83,18 @@ function Page() {
       alert("Please select a move");
       return;
     }
-    setLoading(true);
 
+    socket?.emit("game-created", {
+      opponentWallet,
+      userWallet,
+      stake,
+      userChoice,
+    });
+
+    setLoading(true);
     try {
       setCanReloadGame(false);
-      const hashedMove = hashMove(userChoice, salt!);
+      const hashedMove = hashMove(userChoice!, salt!);
       const { contractAddress, rpsContract } = await createGame(
         hashedMove,
         opponentWallet,
@@ -117,7 +142,6 @@ function Page() {
     setRevealLoading(true);
     try {
       await solveGame(contractAddress, userChoice, salt, signer!);
-      // setRevealed(true);
       const player1Wins = await checkWinForPlayer1(
         contractAddress,
         userChoice,
@@ -128,13 +152,31 @@ function Page() {
         userChoice,
         signer
       );
-      if (player1Wins && !player2Wins) setPrompt("You win!");
-      if (!player1Wins && player2Wins) setPrompt("You lose!");
-      else if (!player1Wins && !player2Wins) setPrompt("It's a draw!");
+      if (player1Wins && !player2Wins) {
+        socket?.emit("game-won", {
+          contractAddress,
+          winner: userWallet,
+        });
+        setPrompt("You win!");
+      }
+      if (!player1Wins && player2Wins) {
+        setPrompt("You lose!");
+        socket?.emit("game-won", {
+          contractAddress,
+          winner: userWallet,
+        });
+      } else if (!player1Wins && !player2Wins) {
+        setPrompt("It's a draw!");
+        socket?.emit("game-won", {
+          contractAddress,
+          winner: "draw",
+        });
+      }
     } catch (err) {
       // TODO : This should probably delete the entry from the server as well
       setPrompt("Failed to reveal move. Please try again");
       setCanReloadGame(true);
+      console.log(err);
     } finally {
       setRevealLoading(false);
       setCanReloadGame(true);

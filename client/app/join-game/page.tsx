@@ -6,18 +6,20 @@ import { play, claimPlayer2Timeout } from "@/contract";
 import axiosInstance from "@/utils/axios";
 import { useContext, useState } from "react";
 import Loader from "@/components/Loader";
+import SocketContext from "@/context/SocketContext";
 
 const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 
 function page() {
-  const { handleWalletConnection, userWallet, signer } =
-    useContext(TransactionContext);
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [prompt, setPrompt] = useState<string>("Select one");
   const [contractAddress, setContractAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [canReloadGame, setCanReloadGame] = useState(false);
+  const { handleWalletConnection, userWallet, signer } =
+    useContext(TransactionContext);
+  const { socket } = useContext(SocketContext);
 
   const handleSubmitMove = async () => {
     if (!userChoice) return;
@@ -39,7 +41,14 @@ function page() {
       setContractAddress(contractAddress);
       await play(contractAddress, userChoice, signer!);
       setPrompt("Ask your opponent to reveal move");
+      console.log(socket);
       setHasPlayed(true);
+      socket!.emit("game-joined", {
+        contractAddress,
+        timeLeft: 300,
+        stake,
+        contract,
+      });
     } catch (err) {
       setPrompt("Ask Player 1 to re-start the game with your wallet address");
       setCanReloadGame(true);
@@ -47,6 +56,11 @@ function page() {
       setLoading(false);
     }
   };
+
+  socket?.on("game-over", (data) => {
+    setPrompt(`${data.contractAddress} has won the game`);
+    setCanReloadGame(true);
+  });
 
   const handleClaimStake = async () => {
     if (!contractAddress) return;

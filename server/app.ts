@@ -8,8 +8,6 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 
-// routes & interface
-
 interface iGames {
   opponentWallet: string;
   contractAddress: string;
@@ -18,7 +16,7 @@ interface iGames {
   contract: any;
 }
 
-const Games: iGames[] = [];
+export const Games: iGames[] = [];
 
 app.post("/start-game", (req, res) => {
   const {
@@ -56,6 +54,7 @@ app.get("/join-game", (req, res) => {
   for (let i = 0; i < Games.length; i++) {
     console.log(Games[i].opponentWallet, opponentWallet);
   }
+
   const game = Games.find((game) => game.opponentWallet === opponentWallet);
   if (game) {
     res.json(game);
