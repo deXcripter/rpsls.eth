@@ -69,7 +69,6 @@ function page() {
         contract,
       });
     } catch (err) {
-      // setPrompt("Ask Player 1 to re-start the game with your wallet address");
       showErrorToast("Failed to join game. Please try again");
       setCanReloadGame(true);
       console.log(err);

@@ -23,7 +23,7 @@ const elementsTag = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 function Page() {
   const [startGame, setStartGame] = useState(false);
   const [opponentWallet, setOpponentWallet] = useState("");
-  const [stake, setStake] = useState<number | string>("");
+  const [stake, setStake] = useState<string>("");
   const [userChoice, setUserChoice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [contractAddress, setContractAddress] = useState("");
@@ -88,12 +88,7 @@ function Page() {
       return;
     }
 
-    socket?.emit("game-created", {
-      opponentWallet,
-      userWallet,
-      stake,
-      userChoice,
-    });
+    console.log(stake);
 
     setLoading(true);
     try {
@@ -102,7 +97,7 @@ function Page() {
       const { contractAddress, rpsContract } = await createGame(
         hashedMove,
         opponentWallet,
-        Number(stake),
+        stake,
         signer!
       );
 
@@ -227,7 +222,7 @@ function Page() {
           placeholder="Enter your stake amount (ETH)"
           className="border-2 outline-none py-2 px-4"
           value={stake}
-          onChange={(e) => setStake(Number(e.target.value))}
+          onChange={(e) => setStake(e.target.value)}
         />
         <button className="bg-blue-400 px-4 py-2" onClick={handleStartGame}>
           Show elements

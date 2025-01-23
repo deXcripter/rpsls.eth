@@ -5,7 +5,7 @@ import { bytecode } from "./bytecode";
 export const createGame = async (
   hashedMove: string,
   oppWallet: string,
-  stake: number,
+  stake: string,
   signer: ethers.ContractRunner
 ) => {
   const factory = new ethers.ContractFactory(contractABI, bytecode, signer);
