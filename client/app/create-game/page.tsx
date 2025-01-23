@@ -32,11 +32,11 @@ function Page() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [revealLoading, setRevealLoading] = useState(false);
   const [canRevealMove, setCanRevealMove] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const [time, setTime] = useState(300);
   const [canReloadGame, setCanReloadGame] = useState(false);
   const [claimedStake, setClaimedStake] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [hasRevealed, setHasRevealed] = useState(false);
 
   const { handleWalletConnection, userWallet, signer, connectingWallet } =
     useContext(TransactionContext);
@@ -109,10 +109,8 @@ function Page() {
         contract: rpsContract,
       });
       setPrompt("Ask your opponent to play their move");
-    } catch (err) {
-      setPrompt("Something went wrong. Please try again");
-      console.log(err);
-      setCanReloadGame(true);
+    } catch (err: any) {
+      showErrorToast(err.code || "An error occurred. Please try again");
     } finally {
       setLoading(false);
     }
@@ -173,12 +171,11 @@ function Page() {
           winner: "draw",
           summary: "It's a draw",
         });
-        setCanReloadGame(true);
         setCanRevealMove(false);
+        setHasRevealed(true);
         setGameOver(true);
       }
     } catch (err) {
-      setCanReloadGame(true);
       console.log(err);
     } finally {
       setRevealLoading(false);
@@ -265,16 +262,15 @@ function Page() {
             </div>
 
             {/* Only show after second player has played. */}
-            {canRevealMove ||
-              (!gameOver && (
-                <button
-                  className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
-                  onClick={handleRevealMove}
-                  disabled={revealed}
-                >
-                  Reveal Move
-                </button>
-              ))}
+            {!hasRevealed && canRevealMove && (
+              <button
+                className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
+                onClick={handleRevealMove}
+                disabled={canRevealMove}
+              >
+                Reveal Move
+              </button>
+            )}
 
             {/* Only show this button when the user has not played */}
             {!hasPlayed && (
@@ -288,7 +284,7 @@ function Page() {
 
             {/* Only show this button when the user has played */}
             {(hasPlayed && !gameOver && !claimedStake) ||
-              (!gameOver && (
+              (!gameOver && hasPlayed && (
                 <CountdownTimer
                   setTimeLeft={setTime}
                   timeLeft={time}
