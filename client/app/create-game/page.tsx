@@ -13,7 +13,7 @@ import {
 import axiosInstance from "@/utils/axios";
 import hashMove from "@/utils/hash";
 import { useState, useContext, useEffect } from "react";
-import { sendHash } from "@/utils/jwt-hash";
+import { saltMove } from "@/utils/salt";
 import { showErrorToast } from "@/utils/toast";
 import SocketContext from "@/context/SocketContext";
 import CountdownTimer from "@/components/Timer";
@@ -43,11 +43,10 @@ function Page() {
   const { socket } = useContext(SocketContext);
 
   useEffect(() => {
-    const hash = sendHash();
+    const hash = saltMove();
     setSalt(hash);
   }, []);
 
-  // Add a flag or use useCallback to prevent multiple listeners
   useEffect(() => {
     const handleUser2Played = () => {
       setTime(300);

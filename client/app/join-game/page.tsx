@@ -144,6 +144,7 @@ function page() {
             Submit Move
           </button>
         )}
+
         {/* Only show this button when the user has played */}
 
         {(hasPlayed && !gameOver) ||

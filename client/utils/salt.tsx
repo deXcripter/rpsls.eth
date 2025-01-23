@@ -1,4 +1,4 @@
-export const sendHash = () => {
+export const saltMove = () => {
   const array = new Uint32Array(1);
   window.crypto.getRandomValues(array);
   const securehash =
