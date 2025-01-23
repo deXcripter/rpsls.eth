@@ -47,7 +47,6 @@ export const solveGame = async (
 
 export const claimPlayer2Timeout = async (
   contractAddress: string,
-
   signer: ethers.ContractRunner
 ) => {
   const contract = new ethers.Contract(contractAddress, contractABI, signer);

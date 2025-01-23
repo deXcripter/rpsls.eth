@@ -4,8 +4,10 @@ const CountdownTimer = ({
   timeLeft: timeLeft,
   setTimeLeft = () => {},
   handler = () => {},
+  hasClaimed = false,
 }: {
   timeLeft: number;
+  hasClaimed: boolean;
   setTimeLeft: (time: number | ((prevTime: number) => number)) => void;
   handler: () => void;
 }) => {
@@ -35,6 +37,7 @@ const CountdownTimer = ({
         <button
           className={`bg-blue-600 w-[40%] text-sm mx-auto px-2 py-2`}
           onClick={handler}
+          disabled={hasClaimed}
         >
           Claim Stake
         </button>

@@ -5,20 +5,29 @@ const elements = ["Rock", "Paper", "Scissors", "Lizard", "Spock"];
 function Elements({
   name,
   setUserChoice,
+  userChoice,
+  hasPlayed,
 }: {
   name: string;
   setUserChoice: (value: number) => void;
+  userChoice: number | null;
+  hasPlayed: boolean;
 }) {
   if (!elements.includes(name)) return null;
+
+  const handelSetUserChoice = (value: number) => {
+    if (hasPlayed) return;
+    setUserChoice(value);
+  };
 
   return (
     <div>
       <div
         className={`${name.toLocaleLowerCase()} h-32 w-32 flex justify-center items-center rounded-full transition-transform transform hover:scale-110`}
-        onClick={() => setUserChoice(elements.indexOf(name) + 1)}
+        onClick={() => handelSetUserChoice(elements.indexOf(name) + 1)}
       >
         <div
-          className="bg-white h-24 w-24 flex justify-center items-center rounded-full transition-transform transform hover:scale-105"
+          className={`bg-white h-24 w-24 flex justify-center items-center rounded-full transition-transform transform hover:scale-105`}
           title={name}
         >
           <Image

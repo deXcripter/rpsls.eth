@@ -100,8 +100,8 @@ function Page() {
         stake,
         signer!
       );
-
       setContractAddress(contractAddress);
+      setHasPlayed(true);
       await axiosInstance.post("/start-game", {
         contractAddress,
         opponentWallet,
@@ -109,7 +109,6 @@ function Page() {
         contract: rpsContract,
       });
       setPrompt("Ask your opponent to play their move");
-      setHasPlayed(true);
     } catch (err) {
       setPrompt("Something went wrong. Please try again");
       console.log(err);
@@ -248,6 +247,8 @@ function Page() {
                   key={name}
                   name={name}
                   setUserChoice={setUserChoice}
+                  hasPlayed={hasPlayed}
+                  userChoice={userChoice}
                 />
               ))}
             </div>
@@ -264,15 +265,16 @@ function Page() {
             </div>
 
             {/* Only show after second player has played. */}
-            {canRevealMove && (
-              <button
-                className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
-                onClick={handleRevealMove}
-                disabled={revealed}
-              >
-                Reveal Move
-              </button>
-            )}
+            {canRevealMove ||
+              (!gameOver && (
+                <button
+                  className="bg-yellow-400 w-[40%] mx-auto px-2 py-2"
+                  onClick={handleRevealMove}
+                  disabled={revealed}
+                >
+                  Reveal Move
+                </button>
+              ))}
 
             {/* Only show this button when the user has not played */}
             {!hasPlayed && (
@@ -285,13 +287,15 @@ function Page() {
             )}
 
             {/* Only show this button when the user has played */}
-            {hasPlayed && !gameOver && !claimedStake && (
-              <CountdownTimer
-                setTimeLeft={setTime}
-                timeLeft={time}
-                handler={handleClaimStake}
-              />
-            )}
+            {(hasPlayed && !gameOver && !claimedStake) ||
+              (!gameOver && (
+                <CountdownTimer
+                  setTimeLeft={setTime}
+                  timeLeft={time}
+                  handler={handleClaimStake}
+                  hasClaimed={claimedStake}
+                />
+              ))}
 
             {canReloadGame && (
               <button

@@ -21,6 +21,7 @@ function page() {
   const [canReloadGame, setCanReloadGame] = useState(false);
   const [time, setTime] = useState(300);
   const [gameOver, setGameOver] = useState(false);
+  const [claimStake, setClaimStake] = useState(false);
   const { handleWalletConnection, userWallet, signer } =
     useContext(TransactionContext);
   const { socket } = useContext(SocketContext);
@@ -33,6 +34,7 @@ function page() {
       winner && setPrompt("You won!");
       !winner && setPrompt(`${data.gameData.summary}`);
       setCanReloadGame(true);
+      setGameOver(true);
     });
 
     return () => {
@@ -60,7 +62,6 @@ function page() {
       setContractAddress(contractAddress);
       await play(contractAddress, userChoice, signer!);
       setPrompt("Ask your opponent to reveal move");
-      console.log(socket);
       setHasPlayed(true);
       socket!.emit("game-joined", {
         contractAddress,
@@ -70,7 +71,6 @@ function page() {
       });
     } catch (err) {
       showErrorToast("Failed to join game. Please try again");
-      setCanReloadGame(true);
       console.log(err);
     } finally {
       setLoading(false);
@@ -82,10 +82,11 @@ function page() {
     try {
       await claimPlayer2Timeout(contractAddress, signer!);
       setPrompt("Stake claimed successfully!");
+      setClaimStake(true);
       setCanReloadGame(true);
     } catch (err) {
       console.error("Error claiming stake:", err);
-      setPrompt("Failed to claim stake. Please try again in 5 minutes");
+      showErrorToast("Failed to claim stake. Please try");
     }
   };
 
@@ -115,7 +116,13 @@ function page() {
         </h1>
         <div className="flex justify-center gap-4 mt-4">
           {elementsTag.map((name) => (
-            <Elements key={name} name={name} setUserChoice={setUserChoice} />
+            <Elements
+              key={name}
+              name={name}
+              setUserChoice={setUserChoice}
+              userChoice={userChoice}
+              hasPlayed={hasPlayed}
+            />
           ))}
         </div>
       </div>
@@ -138,13 +145,16 @@ function page() {
           </button>
         )}
         {/* Only show this button when the user has played */}
-        {hasPlayed && !gameOver && (
-          <CountdownTimer
-            setTimeLeft={setTime}
-            timeLeft={time}
-            handler={handleClaimStake}
-          />
-        )}
+
+        {(hasPlayed && !gameOver) ||
+          (claimStake && (
+            <CountdownTimer
+              setTimeLeft={setTime}
+              timeLeft={time}
+              handler={handleClaimStake}
+              hasClaimed={claimStake}
+            />
+          ))}
         {canReloadGame && (
           <button
             className="bg-red-500 w-[40%] mx-auto px-2 py-2"
